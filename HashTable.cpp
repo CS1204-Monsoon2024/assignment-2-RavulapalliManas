@@ -65,7 +65,7 @@ public:
 
     // Insert function
     void insert(int key) {
-        if ((n > m*alpha) {
+        if (n > m*alpha) {
             resize();
         }
 
