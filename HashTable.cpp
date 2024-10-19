@@ -43,7 +43,7 @@ private:
         // Rehash all existing elements into the new table
         for (int i = 0; i < m; i++) {
             if (table[i] != -1 && !deleted[i]) { // Only rehash non-deleted elements
-                int newIndex = hash(table[i]) % new_m;
+                int newIndex = table[i]%new_m;
                 int j = 0;
                 while (newTable[(newIndex + j * j) % new_m] != -1) {
                     j++;
