@@ -102,6 +102,9 @@ public:
         return -1;
     }
 
+    void remove(int key){
+        
+    }
     void printTable() {
     for (int i = 0; i < size; i++) {
         if (arr[i] == -1) {
