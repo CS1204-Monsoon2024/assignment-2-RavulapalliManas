@@ -23,11 +23,10 @@ int newprime(int n) {
 
 class HashTable {
 private:
-    int n;            // Number of elements in the table
-    int m;            // Size of the table
-    float alpha;      // Load factor threshold
-    vector<int> table;   // The hash table (stores keys)
-    vector<bool> deleted; // Tracks deleted slots (true = deleted)
+    int n; // Number of elements in the table
+    int m; // Size of the table
+    float alpha; // Load factor threshold
+    vector<int> table; // The hash table (stores keys)
 
     // Hash function: h(k) = k % m
     int hash(int key) {
@@ -38,12 +37,11 @@ private:
     void resize() {
         int new_m = newprime(2 * m); // New size should be a prime number
         vector<int> newTable(new_m, -1); // Initialize new table
-        vector<bool> newDeleted(new_m, false); // Initialize new deleted flags
 
         // Rehash all existing elements into the new table
         for (int i = 0; i < m; i++) {
-            if (table[i] != -1 && !deleted[i]) { // Only rehash non-deleted elements
-                int newIndex = table[i]%new_m;
+            if (table[i] != -1) { // Only rehash non-empty elements
+                int newIndex = table[i] % new_m;
                 int j = 0;
                 while (newTable[(newIndex + j * j) % new_m] != -1) {
                     j++;
@@ -52,68 +50,63 @@ private:
             }
         }
 
-        table = newTable;    // Replace old table with the new one
-        deleted = newDeleted; // Replace deleted flags
-        m = new_m;           // Update the table size
+        table = newTable; // Replace old table with the new one
+        m = new_m; // Update the table size
     }
 
 public:
     // Constructor to initialize the hash table with a prime size
     HashTable(int size) {
         m = newprime(size); // Adjust size to the nearest prime number
-        table.resize(m, -1);   // Initialize the table with -1 (indicating empty)
-        deleted.resize(m, false); // No deleted elements initially
+        table.resize(m, -1); // Initialize the table with -1 (indicating empty)
         alpha = 0.8;
         n = 0;
     }
 
-    // Insert Functiobn
+    // Insert function
     void insert(int key) {
-        cout<< key<<"insert"<<endl;
-    if ((float)n / m > alpha) {
-        resize();
-    }
-
-    int index = hash(key);
-    int j = 0;
-
-    while (j < m) {
-        int newIndex = (index + j * j) % m;
-
-        // Check if the key already exists
-        if (table[newIndex] == key && !deleted[newIndex]) {
-            cout << "Duplicate key insertion is not allowed" << endl;
-            return; 
+        cout << key << " insert" << endl;
+        if ((float)n / m > alpha) {
+            resize();
         }
 
-        // If we find an empty or deleted slot, insert the key
-        if (table[newIndex] == -1 || deleted[newIndex]) {
-            table[newIndex] = key; // Insert key
-            deleted[newIndex] = false; // Reset the deleted flag
-            n++;
-            return;
+        int index = hash(key);
+        int j = 0;
+
+        while (j < m) {
+            int newIndex = (index + j * j) % m;
+
+            // Check if the key already exists
+            if (table[newIndex] == key) {
+                cout << "Duplicate key insertion is not allowed" << endl;
+                return; 
+            }
+
+            // If we find an empty slot, insert the key
+            if (table[newIndex] == -1) {
+                table[newIndex] = key; // Insert key
+                n++; // Increment the count of elements
+                return;
+            }
+            j++;
         }
-        j++;
+
+        cout << "Max probing limit reached!" << endl; // This will print if you exhaust all probing attempts
     }
-
-    cout << "Max probing limit reached!" << endl; // This will print if you exhaust all probing attempts
-}
-
-   
 
     // Search function
     int search(int key) {
-        cout << key<<endl;
+        cout << key << endl;
         int index = hash(key);
         int j = 0;
 
         // Quadratic probing to search
         while (j < m) {
             int newIndex = (index + j * j) % m;
-            if (table[newIndex] == key && !deleted[newIndex]) {
+            if (table[newIndex] == key) {
                 return newIndex; // Return the index if key is found
             }
-            if (table[newIndex] == -1 && !deleted[newIndex]) {
+            if (table[newIndex] == -1) {
                 return -1; // Return -1 if key is not found
             }
             j++;
@@ -123,12 +116,12 @@ public:
 
     // Remove function
     void remove(int key) {
-        cout<< key<<endl;
+        cout << key << " remove" << endl;
         int index = search(key);
         if (index == -1) {
             cout << "Element not found" << endl;
         } else {
-            deleted[index] = true; // Mark the slot as deleted
+            table[index] = -1; // Mark the slot as empty
             n--; // Decrease the number of elements
         }
     }
@@ -136,7 +129,7 @@ public:
     // Print the current state of the hash table
     void printTable() {
         for (int i = 0; i < m; i++) {
-            if (table[i] == -1 || deleted[i]) {
+            if (table[i] == -1) {
                 cout << "- ";
             } else {
                 cout << table[i] << " ";
@@ -145,4 +138,3 @@ public:
         cout << endl;
     }
 };
-
