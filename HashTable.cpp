@@ -69,7 +69,7 @@ public:
 
     // Insert Functiobn
     void insert(int key) {
-        cout<< key;
+        cout<< key<<endl;
     if ((float)n / m > alpha) {
         resize();
     }
@@ -103,7 +103,7 @@ public:
 
     // Search function
     int search(int key) {
-        cout << key;
+        cout << key<<endl;
         int index = hash(key);
         int j = 0;
 
@@ -123,7 +123,7 @@ public:
 
     // Remove function
     void remove(int key) {
-        cout<< key;
+        cout<< key<<endl;
         int index = search(key);
         if (index == -1) {
             cout << "Element not found" << endl;
