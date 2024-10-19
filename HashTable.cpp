@@ -69,7 +69,7 @@ public:
 
     // Insert Functiobn
     void insert(int key) {
-        cout<< key<<endl;
+        cout<< key<<"insert"<<endl;
     if ((float)n / m > alpha) {
         resize();
     }
