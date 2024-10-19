@@ -1,9 +1,9 @@
-#include<iostream>
-#include<vector>
+#include <iostream>
+#include <vector>
 using namespace std;
 
-//generate a prime number 
-int isprime(int n){
+// Check if a number is prime
+bool isprime(int n) {
     if (n <= 1) return false;
     if (n <= 3) return true;
     if (n % 2 == 0 || n % 3 == 0) return false;
@@ -13,86 +13,99 @@ int isprime(int n){
     return true;
 }
 
-//generate a prime number greater than n
-int newprime(int n){
-    while (!isprime(n)){
+// Generate a prime number greater than n
+int newprime(int n) {
+    while (!isprime(n)) {
         n++;
     }
     return n;
 }
 
-class HashTable{
+class HashTable {
 private:
-    int n; //number of elements
-    int m; //size of the array
-    float alpha; //load factor
-    vector<int> arr;
+    int n; // Number of elements in the table
+    int m; // Size of the table
+    float alpha; // Load factor threshold
+    vector<int> keys; // Stores keys (initialized to -1 for empty slots)
+    vector<int> values; // Stores values (initialized to -1 for empty slots)
+    vector<bool> deleted; // Marks if a key has been deleted
 
-    //hashing function
-    int hash(int key){
+    // Hashing function: h(k) = k % m
+    int hash(int key) {
         return key % m;
     }
-    //resing the table
-    void resize(){
-        int new_m = newprime(2*m);
-        vector<int> newarr(new_m, -1);
-        
-        //inserting the elements into the new array
-        for (int i = 0; i < m; i++){
-            if (arr[i] != -1){
-               int newindex = hash(arr[i], new_m);
-               int j = 0;
-               while(newarr[newindex] != -1){
-                newindex = (hash(arr[i]) + j*j) % new_m;
-                j++;
-               }
-               newarr[newindex] = arr[i];
+
+    // Resize and rehash the table when load factor exceeds alpha
+    void resize() {
+        int new_m = newprime(2 * m); // Find the new size (prime)
+        vector<int> newKeys(new_m, -1);
+        vector<int> newValues(new_m, -1);
+        vector<bool> newDeleted(new_m, false);
+
+        // Rehash all keys and values into the new table
+        for (int i = 0; i < m; i++) {
+            if (keys[i] != -1 && !deleted[i]) { // Rehash only valid keys
+                int newindex = hash(keys[i]) % new_m;
+                int j = 0;
+                while (newKeys[(newindex + j * j) % new_m] != -1) {
+                    j++;
+                }
+                newKeys[(newindex + j * j) % new_m] = keys[i];
+                newValues[(newindex + j * j) % new_m] = values[i];
             }
         }
-        arr = newarr;
-        m = new_m;
+        keys = newKeys;
+        values = newValues;
+        deleted = newDeleted;
+        m = new_m; // Update the size of the table
     }
 
 public:
-    HashTable(int size){
+    HashTable(int size) {
         m = newprime(size);
-        arr.resize(m, -1);
+        keys.resize(m, -1); // Initialize keys to -1 (empty)
+        values.resize(m, -1); // Initialize values to -1 (empty)
+        deleted.resize(m, false); // Initially, no key has been deleted
         alpha = 0.8;
-        n = 0;  
-
+        n = 0;
     }
-    void insert(int key){
-        if ((float)n/m > alpha){
-            resize();
+
+    // Insert key-value pair into the hash table
+    void insert(int key, int value) {
+        if ((float)n / m > alpha) {
+            resize(); // Resize if load factor exceeds alpha
         }
+
         int index = hash(key);
         int j = 0;
-        while(j<m){
-            int newindex = (hash(key) + j*j) % m;
-            if(arr[newindex] == key){
-                cout << "Duplicate key insertion is not allowed" << endl;
-                return -1;
-            }
-            else if(arr[newindex] == -1){
-                arr[newindex] = key;
+        while (j < m) {
+            int newindex = (index + j * j) % m;
+            if (keys[newindex] == key) {
+                // Update value if key already exists
+                values[newindex] = value;
+                return;
+            } else if (keys[newindex] == -1 || deleted[newindex]) {
+                // Insert into the first available slot
+                keys[newindex] = key;
+                values[newindex] = value;
+                deleted[newindex] = false;
                 n++;
-                break;
+                return;
             }
             j++;
         }
         cout << "Max probing limit reached!" << endl;
-        return -1;
     }
 
-    int search(int key){
+    // Search for a key and return its associated value
+    int search(int key) {
         int index = hash(key);
         int j = 0;
-        while(j<m){
-            int newindex = (hash(key) + j*j) % m;
-            if(arr[newindex] == key){
-                return newindex;
-            }
-            else if(arr[newindex] == -1){
+        while (j < m) {
+            int newindex = (index + j * j) % m;
+            if (keys[newindex] == key && !deleted[newindex]) {
+                return values[newindex];
+            } else if (keys[newindex] == -1 && !deleted[newindex]) {
                 cout << "Element not found" << endl;
                 return -1;
             }
@@ -102,20 +115,34 @@ public:
         return -1;
     }
 
-    void remove(int key){
-        
-    }
-    void printTable() {
-    for (int i = 0; i < size; i++) {
-        if (arr[i] == -1) {
-            std::cout << "- ";
-        } else {
-            std::cout << table[i] << " ";
+    // Delete a key from the hash table
+    void remove(int key) {
+        int index = hash(key);
+        int j = 0;
+        while (j < m) {
+            int newindex = (index + j * j) % m;
+            if (keys[newindex] == key && !deleted[newindex]) {
+                deleted[newindex] = true; // Mark the key as deleted
+                n--;
+                return;
+            } else if (keys[newindex] == -1 && !deleted[newindex]) {
+                cout << "Key not found!" << endl;
+                return;
+            }
+            j++;
         }
+        cout << "Key not found!" << endl;
     }
-    std::cout << "\n";
-}
 
+    // Print the current state of the hash table
+    void printTable() {
+        for (int i = 0; i < m; i++) {
+            if (keys[i] == -1 || deleted[i]) {
+                cout << "- ";
+            } else {
+                cout << "(" << keys[i] << ", " << values[i] << ") ";
+            }
+        }
+        cout << "\n";
+    }
 };
-
-
