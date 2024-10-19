@@ -67,32 +67,38 @@ public:
         n = 0;
     }
 
-    // Insert function
+    // Insert Functiobn
     void insert(int key) {
-        if ((float)n / m > alpha) { // If load factor exceeds threshold, resize
-            resize();
-        }
-
-        int index = hash(key);
-        int j = 0;
-
-        // Quadratic probing
-        while (j < m) {
-            int newIndex = (index + j * j) % m;
-            if (table[newIndex] == key) {
-                cout << "Duplicate key insertion is not allowed" << endl;
-                return;
-            }
-            if (table[newIndex] == -1 || deleted[newIndex]) {
-                table[newIndex] = key; // Insert key
-                deleted[newIndex] = false; // Reset the deleted flag
-                n++;
-                return;
-            }
-            j++;
-        }
-        cout << "Max probing limit reached!" << endl;
+    if ((float)n / m > alpha) {
+        resize();
     }
+
+    int index = hash(key);
+    int j = 0;
+
+    while (j < m) {
+        int newIndex = (index + j * j) % m;
+
+        // Check if the key already exists
+        if (table[newIndex] == key && !deleted[newIndex]) {
+            cout << "Duplicate key insertion is not allowed" << endl;
+            return; 
+        }
+
+        // If we find an empty or deleted slot, insert the key
+        if (table[newIndex] == -1 || deleted[newIndex]) {
+            table[newIndex] = key; // Insert key
+            deleted[newIndex] = false; // Reset the deleted flag
+            n++;
+            return;
+        }
+        j++;
+    }
+
+    cout << "Max probing limit reached!" << endl; // This will print if you exhaust all probing attempts
+}
+
+   
 
     // Search function
     int search(int key) {
