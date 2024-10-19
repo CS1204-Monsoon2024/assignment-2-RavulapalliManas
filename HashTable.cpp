@@ -2,6 +2,7 @@
 #include<vector>
 using namespace std;
 
+//generate a prime number 
 int isprime(int n){
     if (n <= 1) return false;
     if (n <= 3) return true;
@@ -12,6 +13,7 @@ int isprime(int n){
     return true;
 }
 
+//generate a prime number greater than n
 int newprime(int n){
     while (!isprime(n)){
         n++;
@@ -20,55 +22,97 @@ int newprime(int n){
 }
 
 class HashTable{
-public:
+private:
     int n; //number of elements
     int m; //size of the array
-    float alpha = 0.8; //load factor
+    float alpha; //load factor
     vector<int> arr;
 
+    //hashing function
     int hash(int key){
         return key % m;
     }
-
+    //resing the table
     void resize(){
-        int newsize = newprime(2*m);
-        vector<int> newarr(newsize, -1);
+        int new_m = newprime(2*m);
+        vector<int> newarr(new_m, -1);
+        
+        //inserting the elements into the new array
         for (int i = 0; i < m; i++){
             if (arr[i] != -1){
-                int key = arr[i];
-                int index = hash(key);
-                newarr[index] = key;
+               int newindex = hash(arr[i], new_m);
+               int j = 0;
+               while(newarr[newindex] != -1){
+                newindex = (hash(arr[i]) + j*j) % new_m;
+                j++;
+               }
+               newarr[newindex] = arr[i];
             }
         }
         arr = newarr;
-        m = newsize;
+        m = new_m;
     }
 
+public:
+    HashTable(int size){
+        m = newprime(size);
+        arr.resize(m, -1);
+        alpha = 0.8;
+        n = 0;  
+
+    }
     void insert(int key){
-        if (n/m > alpha){
+        if ((float)n/m > alpha){
             resize();
         }
         int index = hash(key);
-        arr[index] = key;
-        n++;
+        int j = 0;
+        while(j<m){
+            int newindex = (hash(key) + j*j) % m;
+            if(arr[newindex] == key){
+                cout << "Duplicate key insertion is not allowed" << endl;
+                return -1;
+            }
+            else if(arr[newindex] == -1){
+                arr[newindex] = key;
+                n++;
+                break;
+            }
+            j++;
+        }
+        cout << "Max probing limit reached!" << endl;
+        return -1;
     }
 
-    void search(int key){
+    int search(int key){
         int index = hash(key);
-        if (arr[index] == key){
-            cout << "Key found at index " << index << endl;
+        int j = 0;
+        while(j<m){
+            int newindex = (hash(key) + j*j) % m;
+            if(arr[newindex] == key){
+                return newindex;
+            }
+            else if(arr[newindex] == -1){
+                cout << "Element not found" << endl;
+                return -1;
+            }
+            j++;
         }
-        else{
-            cout << "Key not found" << endl;
-        }
+        cout << "Element not found" << endl;
+        return -1;
     }
 
-    void display(){
-        for (int i = 0; i < m; i++){
-            cout << arr[i] << " ";
+    void printHASHTABLE() {
+    for (int i = 0; i < size; i++) {
+        if (arr[i] == -1) {
+            std::cout << "- ";
+        } else {
+            std::cout << table[i] << " ";
         }
-        cout << endl;
     }
+    std::cout << "\n";
+}
+
 };
 
 int main(){
