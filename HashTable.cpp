@@ -66,8 +66,7 @@ public:
     // Insert function
     void insert(int key) {
         float allah = m*alpha;
-        cout << allah << " ";
-        if (n > allah) {
+        if (n >= allah) {
             resize();
         }
 
