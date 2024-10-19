@@ -102,7 +102,7 @@ public:
         return -1;
     }
 
-    void printHASHTABLE() {
+    void printTable() {
     for (int i = 0; i < size; i++) {
         if (arr[i] == -1) {
             std::cout << "- ";
